@@ -6,7 +6,7 @@ const UserSchema = new Schema({
         required: true,
         trim: true,
         lowercase: true,
-        unique: true
+        unique: [true, "Username Already Taken"]
     },
     profilePhoto: {
         type: String,
@@ -20,13 +20,14 @@ const UserSchema = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: [true, "This Email Is Already Registered"]
     },
     role: {
         type: String,
         enum: ['student', 'tutor'],
         lowercase: true,
-        trim: true
+        trim: true,
+        required: true
     },
     passward:{
         type: String,
