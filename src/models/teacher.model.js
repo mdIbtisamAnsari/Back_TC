@@ -1,4 +1,5 @@
 import mongoose, {Schema} from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const TeacherSchema = new Schema({
     _id: false,
@@ -14,7 +15,7 @@ const TeacherSchema = new Schema({
         type: String,
     },
     discription:{
-        type:string
+        type: String
     },
     coursesOffered:[{
         type: mongoose.Schema.Types.ObjectId,
@@ -33,5 +34,7 @@ const TeacherSchema = new Schema({
         ref: "Review"
     }]
 }, {timestamps: true});
+
+TeacherSchema.plugin(mongooseAggregatePaginate);
 
 export const Teacher = mongoose.model("Teacher", TeacherSchema);
