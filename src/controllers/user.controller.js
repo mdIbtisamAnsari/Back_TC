@@ -5,12 +5,12 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import fs from "fs"
 
-const generateAccessAndRefreshTokens = async(userId)=>{
+const generateAccessAndRefreshTokens = async(userId)=>{    
     const user = await User.findById(userId)
 
-    const accessToken = user.generateAccessToken()
+    const accessToken = await user.generateAccessToken()
 
-    const refreshToken = user.generateRefreshToken()
+    const refreshToken = await user.generateRefreshToken()
 
     user.refreshToken = refreshToken
 
