@@ -1,4 +1,4 @@
-import {assyncHandler} from "../utils/asyncHandler.js";
+import {asyncHandler} from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -20,7 +20,7 @@ const generateAccessAndRefreshTokens = async(userId)=>{
 }
 
 
-const registerUser = assyncHandler( async (req, res) => {
+const registerUser = asyncHandler( async (req, res) => {
 
     const { userName, fullName, email, password, role} = req.body;
 
@@ -78,7 +78,7 @@ const registerUser = assyncHandler( async (req, res) => {
     )
 })
 
-const loginUser = assyncHandler( async(req, res )=>{
+const loginUser = asyncHandler( async(req, res )=>{
 
     const { email, password } = req.body;
 
@@ -114,7 +114,7 @@ const loginUser = assyncHandler( async(req, res )=>{
     .cookie("refreshToken", refreshToken, options)
     .json(
         new ApiResponse(200, {
-            user: loggedInUser, accessToken, refreshToken
+            user: loggedInUser
         }, 
         "User logged in successfully"
         )
