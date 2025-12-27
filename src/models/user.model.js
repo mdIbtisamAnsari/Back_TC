@@ -31,9 +31,9 @@ const UserSchema = new Schema({
         trim: true,
         required: true
     },
-    passward:{
+    password:{
         type: String,
-        required: [true, 'PASSWARD IS REQUIRED']
+        required: [true, 'PASSWORD IS REQUIRED']
 
     },
     refreshToken:{
@@ -41,14 +41,13 @@ const UserSchema = new Schema({
     }
 }, { timestamps: true })
 
-UserSchema.pre("save", async function(next){
-    if(!this.isModified("passward")) return next()
-    this.passward= await bcrypt.hash(this.passward, 10)
-    next()
+UserSchema.pre("save", async function(){
+    if(!this.isModified("password")) return;
+    this.password= await bcrypt.hash(this.password, 10)
 })
 
-UserSchema.methods.isPasswarwCorrect= async function(passward){
-    return await bcrypt.compare(passward, this.passward)
+UserSchema.methods.isPasswordCorrect= async function(password){
+    return await bcrypt.compare(password, this.password)
 }
 
 UserSchema.methods.generateAccessToken= async function(){

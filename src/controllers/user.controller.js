@@ -3,6 +3,7 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
+import fs from "fs"
 
 const generateAccessAndRefreshTokens = async(userId)=>{
     const user = await User.findById(userId)
@@ -23,9 +24,15 @@ const registerUser = assyncHandler( async (req, res) => {
 
     const { userName, fullName, email, password, role} = req.body;
 
+    const profileImageLocalPath = req.files?.image?.[0]?.path;
+
     const allCredentials = userName && fullName && email && password && role
 
     if (!allCredentials) {
+
+        if(profileImageLocalPath){
+            fs.unlinkSync(profileImageLocalPath)
+        }
         throw new ApiError(400, "All credentials are required")
     }
 
@@ -33,9 +40,13 @@ const registerUser = assyncHandler( async (req, res) => {
         { $or: [ { userName }, { email }]}
     )
 
-    if (existedUser) { throw new ApiError(409,"user already exists with given username or email")}
+    if (existedUser) { 
 
-    const profileImageLocalPath = req.files?.image[0]?.path;
+        if(profileImageLocalPath){
+            fs.unlinkSync(profileImageLocalPath)
+        }
+        throw new ApiError(409,"user already exists with given username or email")
+    }
 
     if(!profileImageLocalPath){
         throw new ApiError(400, "Profile image is required")
@@ -83,7 +94,7 @@ const loginUser = assyncHandler( async(req, res )=>{
         throw new ApiError(404, "User not found")
     }
 
-    const isPasswordValid = await user.isPasswarwCorrect(password)
+    const isPasswordValid = await user.isPasswordCorrect(password)
 
     if(!isPasswordValid){
         throw new ApiError(401, "Invalid Password")
@@ -98,7 +109,10 @@ const loginUser = assyncHandler( async(req, res )=>{
         secure: true
     }
 
-    return res.status(200).cookie("accessToken", accessToken, options).cookies("refreshToken", refreshToken, options).json(
+    return res.status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
         new ApiResponse(200, {
             user: loggedInUser, accessToken, refreshToken
         }, 
