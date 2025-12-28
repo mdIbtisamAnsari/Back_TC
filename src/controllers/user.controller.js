@@ -2,8 +2,8 @@ import {asyncHandler} from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import {uploadOnCloudinary} from "../utils/cloudinary.js"
-import fs from "fs"
+import {uploadOnCloudinary} from "../utils/cloudinary.js";
+import fs from "fs";
 
 const generateAccessAndRefreshTokens = async(userId)=>{    
     const user = await User.findById(userId)
@@ -114,11 +114,39 @@ const loginUser = asyncHandler( async(req, res )=>{
     .cookie("refreshToken", refreshToken, options)
     .json(
         new ApiResponse(200, {
-            user: loggedInUser
+            user: loggedInUser, accessToken, refreshToken
         }, 
         "User logged in successfully"
         )
     )
 })
 
-export { registerUser, loginUser }
+const logoutUser = asyncHandler( async (req, res) => {
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $unset: {
+                refreshToken: 1
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User Logged Out"))
+})
+
+// const refreshAccessToken = asyncHandler((async(req, res))
+
+// )
+export { registerUser, loginUser, logoutUser }
