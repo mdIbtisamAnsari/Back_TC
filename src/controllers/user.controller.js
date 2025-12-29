@@ -101,7 +101,7 @@ const loginUser = asyncHandler( async(req, res )=>{
         throw new ApiError(401, "Invalid Password")
     }
 
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id)
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id) 
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
@@ -163,6 +163,18 @@ const refreshAccessToken = asyncHandler(async(req, res) => {
         //console.log(decodedToken)
 
         const user = await User.findById(decodedToken?._id);
+
+        if(!user){
+            throw new ApiError(
+                401, "Invalid Token User Does Not Exist"
+            )
+        }
+
+        if(incommingRefreshToken !== user?.refreshToken){
+            throw new ApiError(
+                400, "Incorrect Refresh Token"
+            )
+        }
         
 
         const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id)
