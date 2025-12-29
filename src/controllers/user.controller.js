@@ -3,6 +3,7 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js";
+import jwt from "jsonwebtoken";
 import fs from "fs";
 
 const generateAccessAndRefreshTokens = async(userId)=>{    
@@ -149,6 +150,8 @@ const logoutUser = asyncHandler( async (req, res) => {
 const refreshAccessToken = asyncHandler(async(req, res) => {
     const incommingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
 
+    //console.log(incommingRefreshToken)
+
     if(!incommingRefreshToken){
         throw new ApiError(401, "Unauthorized Request")
     }
@@ -157,15 +160,14 @@ const refreshAccessToken = asyncHandler(async(req, res) => {
 
         const decodedToken = jwt.verify(incommingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
 
-        const user = await User.findById(decodedToken?._id)
+        //console.log(decodedToken)
 
-        if(incommingRefreshToken !== user?.refreshToken){
-            throw new ApiError(401, "Invaled Refresh Token")
-        }
+        const user = await User.findById(decodedToken?._id);
+        
 
-        const {accessToken, newRefreshToken} = await generateAccessAndRefreshTokens(user._id)
+        const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id)
 
-        options = {
+        const options = {
             httpOnly: true,
             secure: true
         }
@@ -173,11 +175,11 @@ const refreshAccessToken = asyncHandler(async(req, res) => {
         res
         .status(200)
         .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", newRefreshToken, options)
+        .cookie("refreshToken", refreshToken, options)
         .json(
             new ApiResponse(
                 200, {
-                    accessToken, refreshToken: newRefreshToken
+                    accessToken, refreshToken: refreshToken
                 },
                 "Access token refreshed"
             )
