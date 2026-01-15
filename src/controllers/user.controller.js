@@ -256,7 +256,7 @@ const verifyMail = asyncHandler(async (req, res) => {
             200, otp, "otp sent"
         ))
     } catch (error) {
-        throw new ApiError(401, "Enter valid email")
+        throw new ApiError(401, error.message || "Error sending mail")
     }
 })
 
