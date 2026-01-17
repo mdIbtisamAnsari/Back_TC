@@ -241,6 +241,12 @@ const verifyMail = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Email is required")
     }
 
+    const existedEmail = await User.findOne({email})
+
+    if(existedEmail){
+        throw new ApiError(410, "Email already exist")
+    }
+
     try {
         const otp = Math.floor(Math.random() * 900000 + 100000)
     
