@@ -50,18 +50,6 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(409, "user already exists with given username")
     }
 
-    const existedUser2 = await User.findOne(
-        { email }
-    )
-
-    if (existedUser2) {
-
-        if (profileImageLocalPath) {
-            fs.unlinkSync(profileImageLocalPath)
-        }
-        throw new ApiError(410, "user already exists with given email")
-    }
-
 
     if (!profileImageLocalPath) {
         throw new ApiError(400, "Profile image is required")
