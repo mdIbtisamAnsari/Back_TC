@@ -39,7 +39,7 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const existedUser = await User.findOne(
-        { $or: [{ userName }, { email }] }
+        { userName }
     )
 
     if (existedUser) {
@@ -47,8 +47,21 @@ const registerUser = asyncHandler(async (req, res) => {
         if (profileImageLocalPath) {
             fs.unlinkSync(profileImageLocalPath)
         }
-        throw new ApiError(409, "user already exists with given username or email")
+        throw new ApiError(409, "user already exists with given username")
     }
+
+    const existedUser2 = await User.findOne(
+        { email }
+    )
+
+    if (existedUser2) {
+
+        if (profileImageLocalPath) {
+            fs.unlinkSync(profileImageLocalPath)
+        }
+        throw new ApiError(410, "user already exists with given email")
+    }
+
 
     if (!profileImageLocalPath) {
         throw new ApiError(400, "Profile image is required")
@@ -69,14 +82,23 @@ const registerUser = asyncHandler(async (req, res) => {
         profilePhoto: photo.url
     })
 
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id)
+
     const createdUser = await User.findById(user._id).select("-password -refreshToken")
 
     if (!createdUser) {
         throw new ApiError(500, "Error while creating user !!")
     }
 
-    return res.status(201).json(
-        new ApiResponse(200, createdUser, "User Registered Successfully")
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res.status(201)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(new ApiResponse(200, createdUser, "User Registered Successfully")
     )
 })
 
@@ -149,7 +171,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 })
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    const incommingRefreshToken = req.cookies?.refreshToken || req.body.refreshToken
+    const incommingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken
 
     //console.log(incommingRefreshToken)
 
