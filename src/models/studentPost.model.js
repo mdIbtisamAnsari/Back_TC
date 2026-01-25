@@ -2,11 +2,12 @@ import mongoose, {Schema} from "mongoose";
 
 const StudentPostSchema = new Schema({
     studentID:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     },
     studentQualification:{
-        types: String,
+        type: String,
         required: true
     },
     selectedSubject:{
