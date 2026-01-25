@@ -1,20 +1,46 @@
 import mongoose, {Schema} from "mongoose";
 
 const StudentPostSchema = new Schema({
-    studentName:{
+    studentID:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Student"
+        ref: "User"
     },
-    grade:{
-        types: mongoose.Schema.Types.ObjectId,
-        ref: "Student"
+    studentQualification:{
+        types: String,
+        required: true
     },
-    subject:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Subject"
+    selectedSubject:{
+        type: String,
+        required: true
+    },
+    selectedCategory:{
+        type: String,
+        required: true
     },
     offer:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Student"
+        type: Number,
+        required: true
+    },
+    requirement:{
+        type: String,
+        required: true
+    },
+    tutorQualification:{
+        type: String,
+        required: true
+    },
+    mode:{
+        type: String,
+        required: true
+    },
+    country:{
+        type: String,
+        required: true
+    },
+    address:{
+        type: String,
+        required: true
     }
 },{timestamps: true})
+
+export const studentPost = mongoose.model("studentPost", StudentPostSchema)
