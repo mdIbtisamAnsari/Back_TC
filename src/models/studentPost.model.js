@@ -1,4 +1,5 @@
 import mongoose, {Schema} from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const StudentPostSchema = new Schema({
     studentID:{
@@ -43,5 +44,7 @@ const StudentPostSchema = new Schema({
         required: true
     }
 },{timestamps: true})
+
+StudentPostSchema.plugin(mongooseAggregatePaginate)
 
 export const studentPost = mongoose.model("studentPost", StudentPostSchema)

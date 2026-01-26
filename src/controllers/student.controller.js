@@ -2,21 +2,27 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { studentPost } from "../models/studentPost.model.js";
+import { User } from "../models/user.model.js";
+import { refreshAccessToken } from "./user.controller.js";
 
+const createStudentPost = asyncHandler(async (req, res) => {
+    let { selectedCategory, selectedSubject, customSubject, studentQualification, requirement, tutorQualification, offer, mode, country, address } = req.body
 
-import mongoose from "mongoose";
+    if (!(selectedSubject || customSubject)) {
+        throw new ApiError(400, "Please select or enter a subject")
+    }
 
-const createStudentPost = asyncHandler(async(req, res)=>{
-    const {selectedCategory, selectedSubject, studentQualification, requirement, tutorQualification, offer, mode, country, address} = req.body
+    if (customSubject) {
+        selectedSubject = customSubject
+    }
 
-
-    if(!(selectedCategory && selectedSubject && studentQualification && requirement && tutorQualification && offer && mode && country && address)){
+    if (!(selectedCategory && studentQualification && requirement && tutorQualification && offer && mode && country && address)) {
         throw new ApiError(400, "All fields are required")
     }
 
     try {
-        await studentPost.create({
-            studentID: new mongoose.Types.ObjectId(req.user._id),
+        const newPost = await studentPost.create({
+            studentID: req.user._id.toString(),
             selectedCategory,
             selectedSubject,
             studentQualification,
@@ -27,8 +33,9 @@ const createStudentPost = asyncHandler(async(req, res)=>{
             country,
             address
         })
+        console.log('Created post:', newPost)
     } catch (error) {
-        console.error(error)
+        console.error('Error creating post:', error)
     }
 
     return res.status(200).json(
@@ -36,4 +43,38 @@ const createStudentPost = asyncHandler(async(req, res)=>{
     )
 })
 
-export { createStudentPost }
+const getStudentPosts = asyncHandler(async (req, res) => {
+
+    const student = req.user._id
+
+    const posts = await studentPost.aggregate([
+        { $match: { 
+            studentID: student 
+        }},
+        {
+            $lookup: {
+                from: "users",
+                localField: "studentID",
+                foreignField: "_id",
+                as: "studentInfo",
+                pipeline:[{
+                    $project: {
+                        password:0,
+                        refreshAccessToken:0
+                    }
+                }]
+            }
+        },
+        {
+            $unwind: "$studentInfo"
+        }])
+
+    return res.status(200)
+
+        .json(
+            posts,
+            new ApiResponse(200, "Post Data Fetched Successfully")
+        )
+})
+
+export { createStudentPost, getStudentPosts }
