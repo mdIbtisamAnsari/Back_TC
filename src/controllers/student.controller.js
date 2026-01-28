@@ -2,8 +2,6 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiErrors.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { studentPost } from "../models/studentPost.model.js";
-import { User } from "../models/user.model.js";
-import { refreshAccessToken } from "./user.controller.js";
 
 const createStudentPost = asyncHandler(async (req, res) => {
     let { selectedCategory, selectedSubject, customSubject, studentQualification, requirement, tutorQualification, offer, mode, country, address } = req.body
@@ -60,7 +58,7 @@ const getStudentPosts = asyncHandler(async (req, res) => {
                 pipeline:[{
                     $project: {
                         password:0,
-                        refreshAccessToken:0
+                        refreshToken:0
                     }
                 }]
             }
