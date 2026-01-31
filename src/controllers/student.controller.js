@@ -31,7 +31,6 @@ const createStudentPost = asyncHandler(async (req, res) => {
             country,
             address
         })
-        console.log('Created post:', newPost)
     } catch (error) {
         console.error('Error creating post:', error)
     }
