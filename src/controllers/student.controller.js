@@ -74,4 +74,16 @@ const getStudentPosts = asyncHandler(async (req, res) => {
         )
 })
 
-export { createStudentPost, getStudentPosts }
+const deletePost = asyncHandler(async(req, res)=> {
+    const { postID } = req.params;
+    try {
+        await studentPost.findByIdAndDelete(postID)
+    } catch (error) {
+        
+    }
+    return res.status(200).json(
+        new ApiResponse(200, "Post Deleted Successfully")
+    )
+})
+
+export { createStudentPost, getStudentPosts, deletePost }
